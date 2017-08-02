@@ -75,9 +75,10 @@ class BaseNetwork(object):
     def get_dataset(self):
         '''
         I assume the train and test data contains only 10 citys problem.
-        Variable:train,valid,test is list of tuple respectively.
+        Variable:train,valid,test is list of tuples respectively.
         Tuple consists of (np.array([x,y]),np.array([2,4,5,1,3,10,7,9,8,6])) for example,
-        where x and y are the coodinates of citys and later is order of traveling.
+        where x and y are the coodinates of citys and the later is order of traveling.
+        Note that city index starts from 1, not 0. 
         '''
         path = "./train_10citys.pkl.gz"
         test_data_path = './test_10citys.pkl.gz'
