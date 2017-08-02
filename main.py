@@ -3,7 +3,6 @@ import argparse
 import importlib
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--dataset', type=str, default='citys', help='dataset to train')
 parser.add_argument('--batchsize', type=int, default=128, help='literary')
 parser.add_argument('--gpu', type=int, default=0, help='run in  specific GPU')
 parser.add_argument('--nz', type=int, default=2, help='dimension of city')

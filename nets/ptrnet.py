@@ -64,7 +64,7 @@ class Pointer(chainer.Chain):
 
 
 class Network(BaseNetwork):
-    def __init__(self,gpu,batchsize,dataset,net,mode,epochs,save_every_m,load,nz,nc,lr,nh,beam_width, **kwargs):
+    def __init__(self,gpu,batchsize,net,mode,epochs,save_every_m,load,nz,nc,lr,nh,beam_width, **kwargs):
         super(Network, self).__init__(epochs,save_every_m)
         print "==> not used params in this network:", kwargs.keys()
         print "building ..."
@@ -72,7 +72,6 @@ class Network(BaseNetwork):
         self.nc=nc
         self.net = net
         self.mode=mode
-        self.dataset=dataset
         self.lr=lr
         self.batchsize=batchsize
         self.nh = nh
@@ -101,7 +100,7 @@ class Network(BaseNetwork):
         return optimizer
 
     def my_state(self):
-        return '%s_'%(self.net)
+        return '%s'%(self.net)
 
     def read_batch(self, perm, batch_index,data_raw):
         data = np.zeros((self.batchsize, self.nz, self.nc+1), dtype=np.float32)

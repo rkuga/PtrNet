@@ -72,7 +72,13 @@ class BaseNetwork(object):
         }
 
   
-    def get_dataset(self, dataset='citys'):
+    def get_dataset(self):
+        '''
+        I assume the train and test data contains only 10 citys problem.
+        Variable:train,valid,test is list of tuple respectively.
+        Tuple consists of (np.array([x,y]),np.array([2,4,5,1,3,10,7,9,8,6])) for example,
+        where x and y are the coodinates of citys and later is order of traveling.
+        '''
         path = "/train_10citys.pkl.gz"
         test_data_path = './test_10citys.pkl.gz'
 
@@ -98,7 +104,7 @@ class BaseNetwork(object):
             f.close()
 
 
-        self.out_model_dir = './states/'+self.my_state()+dataset
+        self.out_model_dir = './states/'+self.my_state()
         if not os.path.exists(self.out_model_dir):
             os.makedirs(self.out_model_dir)
 
