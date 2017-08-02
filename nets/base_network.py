@@ -79,7 +79,7 @@ class BaseNetwork(object):
         Tuple consists of (np.array([x,y]),np.array([2,4,5,1,3,10,7,9,8,6])) for example,
         where x and y are the coodinates of citys and later is order of traveling.
         '''
-        path = "/train_10citys.pkl.gz"
+        path = "./train_10citys.pkl.gz"
         test_data_path = './test_10citys.pkl.gz'
 
         data_dir, data_file = os.path.split(path)
