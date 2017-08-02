@@ -11,11 +11,11 @@ Install the chainer.
 pip install chainer=='1.24.0'
 ```
   
-## step2.  
+### step2.  
 Create the dataset as discribed in base_network.py.  
 I used 1048576 tours for train data.  
   
-## step3.  
+### step3.  
 Run the code for training.  
 ```
 python main.py
