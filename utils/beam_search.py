@@ -8,6 +8,7 @@ def beam_search(dec,ptrnet,state,enc_outs,t,data,beam_width):
     beam_width=beam_width
     xp=cuda.cupy
     batchsize=data.shape[0]
+    topk = t.T.shape[0]
     route = np.zeros((batchsize,beam_width,t.T.shape[0])).astype(np.int32)
     
     for (j,next_city) in enumerate(t.T[1:]):
@@ -26,8 +27,8 @@ def beam_search(dec,ptrnet,state,enc_outs,t,data,beam_width):
             route[:,:,j] = pred_total_city
             pred_total_city=pred_total_city.reshape(batchsize,beam_width,1)
         else:
-            pred_next_score=np.zeros((batchsize,beam_width,11))
-            pred_next_city=np.zeros((batchsize,beam_width,11)).astype(np.int32)
+            pred_next_score=np.zeros((batchsize,beam_width,topk))
+            pred_next_city=np.zeros((batchsize,beam_width,topk)).astype(np.int32)
             for b in range(beam_width):
                 state={'c1':Variable(c[:,b,:]), 'h1':Variable(h[:,b,:])}
                 cur_city = xp.array([data[i,:,int(pred_total_city[i,b,j-1])] for i in range(batchsize)]).astype(xp.float32)
@@ -37,17 +38,17 @@ def beam_search(dec,ptrnet,state,enc_outs,t,data,beam_width):
                 ptr = ptrnet(enc_outs, y) 
                 ptr=ptr.data.get()
                 pred_next_score[:,b,:]=ptr
-                pred_next_city[:,b,:]=np.tile(np.arange(11),(batchsize,1))
+                pred_next_city[:,b,:]=np.tile(np.arange(topk),(batchsize,1))
 
-            h=F.stack([h for i in range(11)], axis=2).data
-            c=F.stack([c for i in range(11)], axis=2).data
+            h=F.stack([h for i in range(topk)], axis=2).data
+            c=F.stack([c for i in range(topk)], axis=2).data
             
-            pred_total_city = np.tile(route[:,:,:j],(1,1,11)).reshape(batchsize,beam_width,11,j)
-            pred_next_city = pred_next_city.reshape(batchsize,beam_width,11,1)
+            pred_total_city = np.tile(route[:,:,:j],(1,1,topk)).reshape(batchsize,beam_width,topk,j)
+            pred_next_city = pred_next_city.reshape(batchsize,beam_width,topk,1)
             pred_total_city = np.concatenate((pred_total_city,pred_next_city),axis=3)
 
-            pred_total_score = np.tile(pred_total_score.reshape(batchsize,beam_width,1),(1,1,11)).reshape(batchsize,beam_width,11,1)
-            pred_next_score = pred_next_score.reshape(batchsize,beam_width,11,1)
+            pred_total_score = np.tile(pred_total_score.reshape(batchsize,beam_width,1),(1,1,topk)).reshape(batchsize,beam_width,topk,1)
+            pred_next_score = pred_next_score.reshape(batchsize,beam_width,topk,1)
             pred_total_score += pred_next_score
 
             pred_total_score[:,:,0]=-np.inf
@@ -55,14 +56,13 @@ def beam_search(dec,ptrnet,state,enc_outs,t,data,beam_width):
                 for (j_,pred_city) in enumerate(pred_total_city[b,:,0,:j]):
                     for i_,i in enumerate(pred_city):
                         pred_total_score[b,j_,i] = -np.inf
-            # pred_total_score=[pred_total_score[b,j_,i]*(-np.inf) for b in range(batchsize) for (j_,pred_city) in enumerate(pred_total_city[b,:,0,:j]) for i_,i in enumerate(pred_city)]
 
-            idx = pred_total_score.reshape(batchsize,beam_width * 11).argsort(axis=1)[:,::-1][:,:beam_width]
+            idx = pred_total_score.reshape(batchsize,beam_width * topk).argsort(axis=1)[:,::-1][:,:beam_width]
 
-            pred_total_city = pred_total_city[:,idx//11, np.mod(idx,11), :][np.diag_indices(batchsize,ndim=2)].reshape(batchsize,beam_width,j+1)
-            pred_total_score = pred_total_score[:,idx//11, np.mod(idx,11), :][np.diag_indices(batchsize,ndim=2)].reshape(batchsize,beam_width,1)
-            h = h[:,idx//11, np.mod(idx,11), :][np.diag_indices(batchsize,ndim=2)].reshape(batchsize,beam_width,256)
-            c = c[:,idx//11, np.mod(idx,11), :][np.diag_indices(batchsize,ndim=2)].reshape(batchsize,beam_width,256)
+            pred_total_city = pred_total_city[:,idx//topk, np.mod(idx,topk), :][np.diag_indices(batchsize,ndim=2)].reshape(batchsize,beam_width,j+1)
+            pred_total_score = pred_total_score[:,idx//topk, np.mod(idx,topk), :][np.diag_indices(batchsize,ndim=2)].reshape(batchsize,beam_width,1)
+            h = h[:,idx//topk, np.mod(idx,topk), :][np.diag_indices(batchsize,ndim=2)].reshape(batchsize,beam_width,-1)
+            c = c[:,idx//topk, np.mod(idx,topk), :][np.diag_indices(batchsize,ndim=2)].reshape(batchsize,beam_width,-1)
 
             route[:,:,:j+1] = pred_total_city
 
