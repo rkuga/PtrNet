@@ -20,7 +20,7 @@ def beam_search(dec,ptrnet,state,enc_outs,t,data,beam_width):
             c=xp.tile(c.reshape(batchsize,1,-1), (1,beam_width,1))
 
             ptr = ptrnet(enc_outs, y) 
-            ptr=ptr.data.get()
+            ptr = F.log_softmax(ptr).data.get()
 
             pred_total_city = np.argsort(ptr)[:,::-1][:,:beam_width]
             pred_total_score = np.sort(ptr)[:,::-1][:,:beam_width]
@@ -36,7 +36,7 @@ def beam_search(dec,ptrnet,state,enc_outs,t,data,beam_width):
                 h[:,b,:]=state['h1'].data
                 c[:,b,:]=state['c1'].data
                 ptr = ptrnet(enc_outs, y) 
-                ptr=ptr.data.get()
+                ptr = F.log_softmax(ptr).data.get()
                 pred_next_score[:,b,:]=ptr
                 pred_next_city[:,b,:]=np.tile(np.arange(topk),(batchsize,1))
 
