@@ -1,7 +1,7 @@
 # PtrNet
 
 Chainer implementation of ptrnet for TSP.  
-The dataset is not available here so please prepare by yourself. Discription is in /nets/base_network.py.  
+The dataset is not available here so please it prepare by yourself. Discription is in /nets/base_network.py.  
 
 ## how to use  
   
